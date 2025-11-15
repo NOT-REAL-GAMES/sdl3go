@@ -21,6 +21,11 @@ func Init(flags InitFlags) error {
 	return nil
 }
 
+func Delay(ms C.Uint32) {
+
+	C.SDL_Delay(ms)
+}
+
 func Quit() {
 	C.SDL_Quit()
 }

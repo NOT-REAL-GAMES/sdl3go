@@ -4,7 +4,6 @@ package sdl3go
 /*
 #include <SDL3/SDL.h>
 
-// Helper to get event type since 'type' is a Go keyword
 static inline Uint32 get_event_type(SDL_Event *event) {
     return event->type;
 }
@@ -21,16 +20,38 @@ const (
 
 type Event struct {
 	Type EventType
+
+	// Pen events
+	PenProximity *PenProximityEvent
+	PenMotion    *PenMotionEvent
+	PenTouch     *PenTouchEvent
+	PenButton    *PenButtonEvent
+	PenAxis      *PenAxisEvent
 }
 
 func PollEvent() (*Event, bool) {
 	var cevent C.SDL_Event
 
-	for C.SDL_PollEvent(&cevent) {
-		return &Event{
-			Type: EventType(C.get_event_type(&cevent)), // Use our helper!
-		}, true
+	if !C.SDL_PollEvent(&cevent) {
+		return nil, false
 	}
 
-	return nil, false
+	event := &Event{
+		Type: EventType(C.get_event_type(&cevent)),
+	}
+
+	switch event.Type {
+	case EVENT_PEN_PROXIMITY_IN, EVENT_PEN_PROXIMITY_OUT:
+		event.PenProximity = parsePenProximityEvent(&cevent)
+	case EVENT_PEN_MOTION:
+		event.PenMotion = parsePenMotionEvent(&cevent)
+	case EVENT_PEN_DOWN, EVENT_PEN_UP:
+		event.PenTouch = parsePenTouchEvent(&cevent)
+	case EVENT_PEN_BUTTON_DOWN, EVENT_PEN_BUTTON_UP:
+		event.PenButton = parsePenButtonEvent(&cevent)
+	case EVENT_PEN_AXIS:
+		event.PenAxis = parsePenAxisEvent(&cevent)
+	}
+
+	return event, true
 }
