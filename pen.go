@@ -121,7 +121,7 @@ const (
 )
 
 // Pen event types
-const (
+/*const (
 	EVENT_PEN_PROXIMITY_IN  EventType = C.SDL_EVENT_PEN_PROXIMITY_IN
 	EVENT_PEN_PROXIMITY_OUT EventType = C.SDL_EVENT_PEN_PROXIMITY_OUT
 	EVENT_PEN_DOWN          EventType = C.SDL_EVENT_PEN_DOWN
@@ -130,7 +130,7 @@ const (
 	EVENT_PEN_BUTTON_DOWN   EventType = C.SDL_EVENT_PEN_BUTTON_DOWN
 	EVENT_PEN_BUTTON_UP     EventType = C.SDL_EVENT_PEN_BUTTON_UP
 	EVENT_PEN_AXIS          EventType = C.SDL_EVENT_PEN_AXIS
-)
+)*/
 
 // WindowID type
 type WindowID uint32
