@@ -24,6 +24,11 @@ const (
 	EVENT_PEN_BUTTON_DOWN   EventType = C.SDL_EVENT_PEN_BUTTON_DOWN
 	EVENT_PEN_BUTTON_UP     EventType = C.SDL_EVENT_PEN_BUTTON_UP
 	EVENT_PEN_AXIS          EventType = C.SDL_EVENT_PEN_AXIS
+	EVENT_DROP_BEGIN        EventType = C.SDL_EVENT_DROP_BEGIN
+	EVENT_DROP_FILE         EventType = C.SDL_EVENT_DROP_FILE
+	EVENT_DROP_TEXT         EventType = C.SDL_EVENT_DROP_TEXT
+	EVENT_DROP_COMPLETE     EventType = C.SDL_EVENT_DROP_COMPLETE
+	EVENT_DROP_POSITION     EventType = C.SDL_EVENT_DROP_POSITION
 )
 
 type Event struct {
@@ -35,6 +40,9 @@ type Event struct {
 	PenTouch     *PenTouchEvent
 	PenButton    *PenButtonEvent
 	PenAxis      *PenAxisEvent
+
+	// Drag-and-drop events
+	Drop *DropEvent
 }
 
 func PollEvent() (*Event, bool) {
@@ -59,6 +67,8 @@ func PollEvent() (*Event, bool) {
 		event.PenButton = parsePenButtonEvent(&cevent)
 	case EVENT_PEN_AXIS:
 		event.PenAxis = parsePenAxisEvent(&cevent)
+	case EVENT_DROP_BEGIN, EVENT_DROP_FILE, EVENT_DROP_TEXT, EVENT_DROP_COMPLETE, EVENT_DROP_POSITION:
+		event.Drop = parseDropEvent(&cevent)
 	}
 
 	return event, true
