@@ -16,6 +16,10 @@ const (
 	EVENT_QUIT              EventType = C.SDL_EVENT_QUIT
 	EVENT_KEY_DOWN          EventType = C.SDL_EVENT_KEY_DOWN
 	EVENT_KEY_UP            EventType = C.SDL_EVENT_KEY_UP
+	EVENT_MOUSE_MOTION      EventType = C.SDL_EVENT_MOUSE_MOTION
+	EVENT_MOUSE_BUTTON_DOWN EventType = C.SDL_EVENT_MOUSE_BUTTON_DOWN
+	EVENT_MOUSE_BUTTON_UP   EventType = C.SDL_EVENT_MOUSE_BUTTON_UP
+	EVENT_MOUSE_WHEEL       EventType = C.SDL_EVENT_MOUSE_WHEEL
 	EVENT_PEN_PROXIMITY_IN  EventType = C.SDL_EVENT_PEN_PROXIMITY_IN
 	EVENT_PEN_PROXIMITY_OUT EventType = C.SDL_EVENT_PEN_PROXIMITY_OUT
 	EVENT_PEN_DOWN          EventType = C.SDL_EVENT_PEN_DOWN
@@ -33,6 +37,11 @@ const (
 
 type Event struct {
 	Type EventType
+
+	// Mouse events
+	MouseMotion *MouseMotionEvent
+	MouseButton *MouseButtonEvent
+	MouseWheel  *MouseWheelEvent
 
 	// Pen events
 	PenProximity *PenProximityEvent
@@ -57,6 +66,12 @@ func PollEvent() (*Event, bool) {
 	}
 
 	switch event.Type {
+	case EVENT_MOUSE_MOTION:
+		event.MouseMotion = parseMouseMotionEvent(&cevent)
+	case EVENT_MOUSE_BUTTON_DOWN, EVENT_MOUSE_BUTTON_UP:
+		event.MouseButton = parseMouseButtonEvent(&cevent)
+	case EVENT_MOUSE_WHEEL:
+		event.MouseWheel = parseMouseWheelEvent(&cevent)
 	case EVENT_PEN_PROXIMITY_IN, EVENT_PEN_PROXIMITY_OUT:
 		event.PenProximity = parsePenProximityEvent(&cevent)
 	case EVENT_PEN_MOTION:
