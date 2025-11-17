@@ -38,6 +38,9 @@ const (
 type Event struct {
 	Type EventType
 
+	// Keyboard events
+	Keyboard *KeyboardEvent
+
 	// Mouse events
 	MouseMotion *MouseMotionEvent
 	MouseButton *MouseButtonEvent
@@ -66,6 +69,8 @@ func PollEvent() (*Event, bool) {
 	}
 
 	switch event.Type {
+	case EVENT_KEY_DOWN, EVENT_KEY_UP:
+		event.Keyboard = parseKeyboardEvent(&cevent)
 	case EVENT_MOUSE_MOTION:
 		event.MouseMotion = parseMouseMotionEvent(&cevent)
 	case EVENT_MOUSE_BUTTON_DOWN, EVENT_MOUSE_BUTTON_UP:
