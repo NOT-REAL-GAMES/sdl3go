@@ -152,42 +152,42 @@ const (
 // MouseMotionEvent - Mouse moved
 type MouseMotionEvent struct {
 	Type      EventType
-	Timestamp uint64            // In nanoseconds
-	WindowID  WindowID          // The window with mouse focus, if any
-	Which     MouseID           // The mouse instance ID
-	State     MouseButtonFlags  // The current button state
-	X         float32           // X coordinate, relative to window
-	Y         float32           // Y coordinate, relative to window
-	XRel      float32           // Relative motion in the X direction
-	YRel      float32           // Relative motion in the Y direction
+	Timestamp uint64           // In nanoseconds
+	WindowID  WindowID         // The window with mouse focus, if any
+	Which     MouseID          // The mouse instance ID
+	State     MouseButtonFlags // The current button state
+	X         float32          // X coordinate, relative to window
+	Y         float32          // Y coordinate, relative to window
+	XRel      float32          // Relative motion in the X direction
+	YRel      float32          // Relative motion in the Y direction
 }
 
 // MouseButtonEvent - Mouse button pressed or released
 type MouseButtonEvent struct {
 	Type      EventType
-	Timestamp uint64    // In nanoseconds
-	WindowID  WindowID  // The window with mouse focus, if any
-	Which     MouseID   // The mouse instance ID
-	Button    uint8     // The mouse button index (BUTTON_LEFT, etc.)
-	Down      bool      // True if button is pressed, false if released
-	Clicks    uint8     // 1 for single-click, 2 for double-click, etc.
-	X         float32   // X coordinate, relative to window
-	Y         float32   // Y coordinate, relative to window
+	Timestamp uint64   // In nanoseconds
+	WindowID  WindowID // The window with mouse focus, if any
+	Which     MouseID  // The mouse instance ID
+	Button    uint8    // The mouse button index (BUTTON_LEFT, etc.)
+	Down      bool     // True if button is pressed, false if released
+	Clicks    uint8    // 1 for single-click, 2 for double-click, etc.
+	X         float32  // X coordinate, relative to window
+	Y         float32  // Y coordinate, relative to window
 }
 
 // MouseWheelEvent - Mouse wheel scrolled
 type MouseWheelEvent struct {
-	Type       EventType
-	Timestamp  uint64              // In nanoseconds
-	WindowID   WindowID            // The window with mouse focus, if any
-	Which      MouseID             // The mouse instance ID
-	X          float32             // Scroll amount in X direction (horizontal)
-	Y          float32             // Scroll amount in Y direction (vertical)
-	Direction  MouseWheelDirection // Scroll direction (normal or flipped)
-	MouseX     float32             // X coordinate of mouse cursor
-	MouseY     float32             // Y coordinate of mouse cursor
-	IntegerX   int32               // Accumulated whole scroll ticks in X
-	IntegerY   int32               // Accumulated whole scroll ticks in Y
+	Type      EventType
+	Timestamp uint64              // In nanoseconds
+	WindowID  WindowID            // The window with mouse focus, if any
+	Which     MouseID             // The mouse instance ID
+	X         float32             // Scroll amount in X direction (horizontal)
+	Y         float32             // Scroll amount in Y direction (vertical)
+	Direction MouseWheelDirection // Scroll direction (normal or flipped)
+	MouseX    float32             // X coordinate of mouse cursor
+	MouseY    float32             // Y coordinate of mouse cursor
+	IntegerX  int32               // Accumulated whole scroll ticks in X
+	IntegerY  int32               // Accumulated whole scroll ticks in Y
 }
 
 // Helper methods for MouseMotionEvent
@@ -255,4 +255,19 @@ func parseMouseWheelEvent(cevent *C.SDL_Event) *MouseWheelEvent {
 		IntegerX:  int32(C.get_wheel_integer_x(cevent)),
 		IntegerY:  int32(C.get_wheel_integer_y(cevent)),
 	}
+}
+
+// SetRelativeMouseMode enables or disables relative mouse mode.
+// When enabled, the cursor is hidden and mouse motion is reported as relative
+// deltas, useful for FPS-style camera controls.
+func SetRelativeMouseMode(window Window, enabled bool) error {
+	if !C.SDL_SetWindowRelativeMouseMode(window.handle, C.bool(enabled)) {
+		return GetError()
+	}
+	return nil
+}
+
+// GetRelativeMouseMode returns whether relative mouse mode is enabled.
+func GetRelativeMouseMode(window Window) bool {
+	return bool(C.SDL_GetWindowRelativeMouseMode(window.handle))
 }

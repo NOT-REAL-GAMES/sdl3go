@@ -57,6 +57,10 @@ type Event struct {
 	Drop *DropEvent
 }
 
+func PumpEvents() {
+	C.SDL_PumpEvents()
+}
+
 func PollEvent() (*Event, bool) {
 	var cevent C.SDL_Event
 

@@ -11,7 +11,9 @@ import "C"
 type InitFlags uint32
 
 const (
-	INIT_VIDEO InitFlags = C.SDL_INIT_VIDEO
+	INIT_VIDEO  InitFlags = C.SDL_INIT_VIDEO
+	INIT_EVENTS InitFlags = C.SDL_INIT_EVENTS
+	INIT_AUDIO  InitFlags = C.SDL_INIT_AUDIO
 )
 
 func Init(flags InitFlags) error {
@@ -24,6 +26,10 @@ func Init(flags InitFlags) error {
 func Delay(ms C.Uint32) {
 
 	C.SDL_Delay(ms)
+}
+
+func GetTicks() uint32 {
+	return uint32(C.SDL_GetTicks())
 }
 
 func Quit() {
