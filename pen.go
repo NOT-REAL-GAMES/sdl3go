@@ -9,6 +9,21 @@ static inline Uint32 get_event_type(SDL_Event *event) {
     return event->type;
 }
 
+static inline Uint64 get_pen_timestamp(SDL_Event *event, Uint32 type) {
+    if (type == SDL_EVENT_PEN_PROXIMITY_IN || type == SDL_EVENT_PEN_PROXIMITY_OUT) {
+        return event->pproximity.timestamp;
+    } else if (type == SDL_EVENT_PEN_MOTION) {
+        return event->pmotion.timestamp;
+    } else if (type == SDL_EVENT_PEN_DOWN || type == SDL_EVENT_PEN_UP) {
+        return event->ptouch.timestamp;
+    } else if (type == SDL_EVENT_PEN_BUTTON_DOWN || type == SDL_EVENT_PEN_BUTTON_UP) {
+        return event->pbutton.timestamp;
+    } else if (type == SDL_EVENT_PEN_AXIS) {
+        return event->paxis.timestamp;
+    }
+    return 0;
+}
+
 // Helpers to access pen event data from the union
 static inline SDL_PenID get_pen_which(SDL_Event *event, Uint32 type) {
     if (type == SDL_EVENT_PEN_PROXIMITY_IN || type == SDL_EVENT_PEN_PROXIMITY_OUT) {
@@ -137,55 +152,60 @@ type WindowID uint32
 
 // PenProximityEvent - Pen entered/left detection range
 type PenProximityEvent struct {
-	Type     EventType
-	WindowID WindowID
-	Which    PenID
+	Type      EventType
+	Timestamp uint64
+	WindowID  WindowID
+	Which     PenID
 }
 
 // PenMotionEvent - Pen moved
 type PenMotionEvent struct {
-	Type     EventType
-	WindowID WindowID
-	Which    PenID
-	PenState PenInputFlags
-	X        float32
-	Y        float32
+	Type      EventType
+	Timestamp uint64
+	WindowID  WindowID
+	Which     PenID
+	PenState  PenInputFlags
+	X         float32
+	Y         float32
 }
 
 // PenTouchEvent - Pen touched/lifted from surface
 type PenTouchEvent struct {
-	Type     EventType
-	WindowID WindowID
-	Which    PenID
-	PenState PenInputFlags
-	X        float32
-	Y        float32
-	Eraser   bool
-	Down     bool
+	Type      EventType
+	Timestamp uint64
+	WindowID  WindowID
+	Which     PenID
+	PenState  PenInputFlags
+	X         float32
+	Y         float32
+	Eraser    bool
+	Down      bool
 }
 
 // PenButtonEvent - Pen button pressed/released
 type PenButtonEvent struct {
-	Type     EventType
-	WindowID WindowID
-	Which    PenID
-	PenState PenInputFlags
-	X        float32
-	Y        float32
-	Button   uint8
-	Down     bool
+	Type      EventType
+	Timestamp uint64
+	WindowID  WindowID
+	Which     PenID
+	PenState  PenInputFlags
+	X         float32
+	Y         float32
+	Button    uint8
+	Down      bool
 }
 
 // PenAxisEvent - Pen axis (pressure, tilt, etc.) changed
 type PenAxisEvent struct {
-	Type     EventType
-	WindowID WindowID
-	Which    PenID
-	PenState PenInputFlags
-	X        float32
-	Y        float32
-	Axis     PenAxis
-	Value    float32
+	Type      EventType
+	Timestamp uint64
+	WindowID  WindowID
+	Which     PenID
+	PenState  PenInputFlags
+	X         float32
+	Y         float32
+	Axis      PenAxis
+	Value     float32
 }
 
 // Helper methods
@@ -205,62 +225,67 @@ func (e *PenTouchEvent) IsEraser() bool {
 func parsePenProximityEvent(cevent *C.SDL_Event) *PenProximityEvent {
 	eventType := C.get_event_type(cevent) // Access directly!
 	return &PenProximityEvent{
-		Type:     EventType(eventType),
-		WindowID: WindowID(C.get_pen_window(cevent, eventType)),
-		Which:    PenID(C.get_pen_which(cevent, eventType)),
+		Type:      EventType(eventType),
+		Timestamp: uint64(C.get_pen_timestamp(cevent, eventType)),
+		WindowID:  WindowID(C.get_pen_window(cevent, eventType)),
+		Which:     PenID(C.get_pen_which(cevent, eventType)),
 	}
 }
 
 func parsePenMotionEvent(cevent *C.SDL_Event) *PenMotionEvent {
 	eventType := C.get_event_type(cevent)
 	return &PenMotionEvent{
-		Type:     EventType(eventType),
-		WindowID: WindowID(C.get_pen_window(cevent, eventType)),
-		Which:    PenID(C.get_pen_which(cevent, eventType)),
-		PenState: PenInputFlags(C.get_pen_state(cevent, eventType)),
-		X:        float32(C.get_pen_x(cevent, eventType)),
-		Y:        float32(C.get_pen_y(cevent, eventType)),
+		Type:      EventType(eventType),
+		Timestamp: uint64(C.get_pen_timestamp(cevent, eventType)),
+		WindowID:  WindowID(C.get_pen_window(cevent, eventType)),
+		Which:     PenID(C.get_pen_which(cevent, eventType)),
+		PenState:  PenInputFlags(C.get_pen_state(cevent, eventType)),
+		X:         float32(C.get_pen_x(cevent, eventType)),
+		Y:         float32(C.get_pen_y(cevent, eventType)),
 	}
 }
 
 func parsePenTouchEvent(cevent *C.SDL_Event) *PenTouchEvent {
 	eventType := C.get_event_type(cevent)
 	return &PenTouchEvent{
-		Type:     EventType(eventType),
-		WindowID: WindowID(C.get_pen_window(cevent, eventType)),
-		Which:    PenID(C.get_pen_which(cevent, eventType)),
-		PenState: PenInputFlags(C.get_pen_state(cevent, eventType)),
-		X:        float32(C.get_pen_x(cevent, eventType)),
-		Y:        float32(C.get_pen_y(cevent, eventType)),
-		Eraser:   bool(C.get_pen_eraser(cevent)),
-		Down:     bool(C.get_pen_down(cevent)),
+		Type:      EventType(eventType),
+		Timestamp: uint64(C.get_pen_timestamp(cevent, eventType)),
+		WindowID:  WindowID(C.get_pen_window(cevent, eventType)),
+		Which:     PenID(C.get_pen_which(cevent, eventType)),
+		PenState:  PenInputFlags(C.get_pen_state(cevent, eventType)),
+		X:         float32(C.get_pen_x(cevent, eventType)),
+		Y:         float32(C.get_pen_y(cevent, eventType)),
+		Eraser:    bool(C.get_pen_eraser(cevent)),
+		Down:      bool(C.get_pen_down(cevent)),
 	}
 }
 
 func parsePenButtonEvent(cevent *C.SDL_Event) *PenButtonEvent {
 	eventType := C.get_event_type(cevent)
 	return &PenButtonEvent{
-		Type:     EventType(eventType),
-		WindowID: WindowID(C.get_pen_window(cevent, eventType)),
-		Which:    PenID(C.get_pen_which(cevent, eventType)),
-		PenState: PenInputFlags(C.get_pen_state(cevent, eventType)),
-		X:        float32(C.get_pen_x(cevent, eventType)),
-		Y:        float32(C.get_pen_y(cevent, eventType)),
-		Button:   uint8(C.get_pen_button(cevent)),
-		Down:     bool(C.get_pen_button_down(cevent)),
+		Type:      EventType(eventType),
+		Timestamp: uint64(C.get_pen_timestamp(cevent, eventType)),
+		WindowID:  WindowID(C.get_pen_window(cevent, eventType)),
+		Which:     PenID(C.get_pen_which(cevent, eventType)),
+		PenState:  PenInputFlags(C.get_pen_state(cevent, eventType)),
+		X:         float32(C.get_pen_x(cevent, eventType)),
+		Y:         float32(C.get_pen_y(cevent, eventType)),
+		Button:    uint8(C.get_pen_button(cevent)),
+		Down:      bool(C.get_pen_button_down(cevent)),
 	}
 }
 
 func parsePenAxisEvent(cevent *C.SDL_Event) *PenAxisEvent {
 	eventType := C.get_event_type(cevent)
 	return &PenAxisEvent{
-		Type:     EventType(eventType),
-		WindowID: WindowID(C.get_pen_window(cevent, eventType)),
-		Which:    PenID(C.get_pen_which(cevent, eventType)),
-		PenState: PenInputFlags(C.get_pen_state(cevent, eventType)),
-		X:        float32(C.get_pen_x(cevent, eventType)),
-		Y:        float32(C.get_pen_y(cevent, eventType)),
-		Axis:     PenAxis(C.get_pen_axis_type(cevent)),
-		Value:    float32(C.get_pen_axis_value(cevent)),
+		Type:      EventType(eventType),
+		Timestamp: uint64(C.get_pen_timestamp(cevent, eventType)),
+		WindowID:  WindowID(C.get_pen_window(cevent, eventType)),
+		Which:     PenID(C.get_pen_which(cevent, eventType)),
+		PenState:  PenInputFlags(C.get_pen_state(cevent, eventType)),
+		X:         float32(C.get_pen_x(cevent, eventType)),
+		Y:         float32(C.get_pen_y(cevent, eventType)),
+		Axis:      PenAxis(C.get_pen_axis_type(cevent)),
+		Value:     float32(C.get_pen_axis_value(cevent)),
 	}
 }

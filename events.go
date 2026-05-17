@@ -61,6 +61,10 @@ func PumpEvents() {
 	C.SDL_PumpEvents()
 }
 
+func GetTicksNS() uint64 {
+	return uint64(C.SDL_GetTicksNS())
+}
+
 func PollEvent() (*Event, bool) {
 	var cevent C.SDL_Event
 
