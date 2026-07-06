@@ -22,3 +22,21 @@ func CreateWindow(title string, width, height int, flags WindowFlags) (*Window, 
 func (w *Window) Destroy() {
 	C.SDL_DestroyWindow(w.handle)
 }
+
+func (w *Window) GetSize() (int, int, error) {
+	var width C.int
+	var height C.int
+	if !C.SDL_GetWindowSize(w.handle, &width, &height) {
+		return 0, 0, GetError()
+	}
+	return int(width), int(height), nil
+}
+
+func (w *Window) GetSizeInPixels() (int, int, error) {
+	var width C.int
+	var height C.int
+	if !C.SDL_GetWindowSizeInPixels(w.handle, &width, &height) {
+		return 0, 0, GetError()
+	}
+	return int(width), int(height), nil
+}
