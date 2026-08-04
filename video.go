@@ -3,9 +3,40 @@ package sdl3go
 /*
 #include <stdlib.h>
 #include <SDL3/SDL.h>
+
+static bool sdl3go_window_hdr_enabled(SDL_PropertiesID props) {
+    return SDL_GetBooleanProperty(props, SDL_PROP_WINDOW_HDR_ENABLED_BOOLEAN, false);
+}
+static float sdl3go_window_sdr_white_level(SDL_PropertiesID props) {
+    return SDL_GetFloatProperty(props, SDL_PROP_WINDOW_SDR_WHITE_LEVEL_FLOAT, 1.0f);
+}
+static float sdl3go_window_hdr_headroom(SDL_PropertiesID props) {
+    return SDL_GetFloatProperty(props, SDL_PROP_WINDOW_HDR_HEADROOM_FLOAT, 1.0f);
+}
 */
 import "C"
 import "unsafe"
+
+type WindowHDRState struct {
+	Enabled       bool
+	SDRWhiteLevel float32
+	Headroom      float32
+}
+
+// HDRState reports SDL's current desktop compositor state for this window.
+// SDRWhiteLevel is relative to 80 nits and Headroom is display peak divided by
+// that white level.
+func (w *Window) HDRState() WindowHDRState {
+	if w == nil || w.handle == nil {
+		return WindowHDRState{SDRWhiteLevel: 1, Headroom: 1}
+	}
+	properties := C.SDL_GetWindowProperties(w.handle)
+	return WindowHDRState{
+		Enabled:       bool(C.sdl3go_window_hdr_enabled(properties)),
+		SDRWhiteLevel: float32(C.sdl3go_window_sdr_white_level(properties)),
+		Headroom:      float32(C.sdl3go_window_hdr_headroom(properties)),
+	}
+}
 
 func CreateWindow(title string, width, height int, flags WindowFlags) (*Window, error) {
 	cTitle := C.CString(title)

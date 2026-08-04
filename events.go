@@ -29,9 +29,11 @@ import "C"
 type EventType uint32
 
 const (
+	EVENT_FIRST                     EventType = C.SDL_EVENT_FIRST
 	EVENT_QUIT                      EventType = C.SDL_EVENT_QUIT
 	EVENT_WINDOW_RESIZED            EventType = C.SDL_EVENT_WINDOW_RESIZED
 	EVENT_WINDOW_PIXEL_SIZE_CHANGED EventType = C.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED
+	EVENT_WINDOW_HDR_STATE_CHANGED  EventType = C.SDL_EVENT_WINDOW_HDR_STATE_CHANGED
 	EVENT_KEY_DOWN                  EventType = C.SDL_EVENT_KEY_DOWN
 	EVENT_KEY_UP                    EventType = C.SDL_EVENT_KEY_UP
 	EVENT_MOUSE_MOTION              EventType = C.SDL_EVENT_MOUSE_MOTION
@@ -51,6 +53,7 @@ const (
 	EVENT_DROP_TEXT                 EventType = C.SDL_EVENT_DROP_TEXT
 	EVENT_DROP_COMPLETE             EventType = C.SDL_EVENT_DROP_COMPLETE
 	EVENT_DROP_POSITION             EventType = C.SDL_EVENT_DROP_POSITION
+	EVENT_LAST                      EventType = C.SDL_EVENT_LAST
 )
 
 type Event struct {
@@ -82,6 +85,10 @@ func PumpEvents() {
 	C.SDL_PumpEvents()
 }
 
+func FlushEvents(min EventType, max EventType) {
+	C.SDL_FlushEvents(C.Uint32(min), C.Uint32(max))
+}
+
 func GetTicksNS() uint64 {
 	return uint64(C.SDL_GetTicksNS())
 }
@@ -98,7 +105,7 @@ func PollEvent() (*Event, bool) {
 	}
 
 	switch event.Type {
-	case EVENT_WINDOW_RESIZED, EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+	case EVENT_WINDOW_RESIZED, EVENT_WINDOW_PIXEL_SIZE_CHANGED, EVENT_WINDOW_HDR_STATE_CHANGED:
 		event.Window = parseWindowEvent(&cevent)
 	case EVENT_KEY_DOWN, EVENT_KEY_UP:
 		event.Keyboard = parseKeyboardEvent(&cevent)
